@@ -1,0 +1,12 @@
+É requisito a inclusão de código e bibliotecas OpenCv ao ambiente de Projeto.
+É requisito a compilação do ambiente configurado com a runtime para Cuda.
+
+É necessário adicionar os caminhos ao diretório de debug do arquivo do projeto:
+".\\imageBase\\Read\\"; e, ".\\imageBase\\Write\\";
+
+A imagem feita a letira deve de estar localizada no diretório ".\\imageBase\\Read\\", com seu nome e extenção específicados no argumento 
+(o segundo), via CLI, de execução do programa (.exe), considerando que a chamada do programa seja o primeiro argumento; ou, caso contrário, 
+o arquivo devei de ter um nome padrão, sendo este, "SourceImage.png".
+
+O processamento do programa poderá gerar a imagem processada no diretório padrão, ".\\imageBase\\Write\\", com o nome padrão de arquivo, 
+"ProcessedImage.png"; ou, caso espessíficado, via terceiro argumento da chamada do programa por CLI, terá o nome informado.
