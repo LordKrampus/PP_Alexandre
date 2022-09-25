@@ -125,7 +125,7 @@ int main() {
 	//time_t time_count_end;
 	//int time_cost;
 
-	// processing in kernel
+	// processing in device
 	printf("\n>processing in \"device\" (two factors -> rand and then check):");
 	seed = time(NULL);
 	mark_begin_clock();
