@@ -1,4 +1,4 @@
-﻿/*
+/*
 * # problema:
 *
 *	impar ou par?
@@ -26,6 +26,15 @@ std::chrono::steady_clock::time_point time_end;
 int time_result;
 
 //Devide
+//https://docs.nvidia.com/cuda/curand/device-api-overview.html#device-api-overview
+__global__ void setup_kernel(int seed, curandState* state) {
+	int id = threadIdx.x + blockIdx.x * blockDim.x;
+
+	/* Each thread gets same seed, a different sequence
+	   number, no offset */
+	curand_init(seed, id, 0, &state[id]);
+}
+
 
 __global__ void k_randgenerate(int threadCount, int seed, curandState* state, int* sequence) {
 	int dim = blockDim.x;
@@ -37,6 +46,20 @@ __global__ void k_randgenerate(int threadCount, int seed, curandState* state, in
 
 		sequence[id] = curand(&localState) % 989 + 11; // it looks ok
 		id += dim;
+	}
+}
+
+__global__ void new_k_randgenerate(int threadCount, int seed, curandState* state, int* sequence) {
+	int dim = blockDim.x;
+	int id = threadIdx.x;
+
+	while (id < threadCount) {
+		curandState localState = state[id];
+
+		sequence[id] = curand(&localState) % 989 + 11; // it looks ok
+		id += dim;
+
+		state[id] = localState;
 	}
 }
 
@@ -55,12 +78,27 @@ __global__ void k_even_odd_check(int threadCount, int seed, curandState* state, 
 	int id = threadIdx.x;
 
 	while (id < threadCount) {
-		curand_init(seed, id, 0, &state[id]);
+		curand_init(seed, id, 0, &state[id]); // !!! custo consideravel
 		curandState localState = state[id];
 
 		sequence[id] = curand(&localState) % 989 + 11; // it looks ok
 		result[id] = sequence[id] % 2;
 		id += dim;
+	}
+}
+
+__global__ void new_k_even_odd_check(int threadCount, int seed, curandState* state, int* sequence, int* result) {
+	int dim = blockDim.x;
+	int id = threadIdx.x;
+
+	while (id < threadCount) {
+		curandState localState = state[id];
+
+		sequence[id] = curand(&localState) % 989 + 11; // it looks ok
+		result[id] = sequence[id] % 2;
+		id += dim;
+
+		state[id] = localState;
 	}
 }
 
@@ -109,80 +147,110 @@ void mark_end_clock() {
 }
 
 int main() {
-	int length = 8192;
+
+	int size = 8192;
+	int threadMaxSize = 1024;
+	int blockCount = size > threadMaxSize? (size + 1) / threadMaxSize : 1;
+	int threadCount = blockCount > 1? threadMaxSize : size;
 
 	int *h_sequence, *d_sequence, *h_result, *d_result;
 	curandState *d_state;
+	time_t seed;
 
-	h_sequence = (int*)malloc(length * sizeof(int));
-	h_result = (int*)malloc(length * sizeof(int));
+	int device;
+	struct cudaDeviceProp properties;
 
-	CUDA_CALL(cudaMalloc((void**)&d_sequence, length * sizeof(int)));
-	CUDA_CALL(cudaMalloc((void**)&d_result, length * sizeof(int)));
+	/* check for double precision support */
+	CUDA_CALL(cudaGetDevice(&device));
+	CUDA_CALL(cudaGetDeviceProperties(&properties, device));
+
+	h_sequence = (int*)malloc(size * sizeof(int));
+	h_result = (int*)malloc(size * sizeof(int));
+
+	CUDA_CALL(cudaMalloc((void**)&d_sequence, size * sizeof(int)));
+	CUDA_CALL(cudaMalloc((void**)&d_result, size * sizeof(int)));
 	CUDA_CALL(cudaMalloc((void**)&d_state, sizeof(curandState)));
 
-	time_t seed;
-	//time_t time_count_end;
-	//int time_cost;
+
+	// setup time and kernel for curand
+	std::cout << ".quantidade de blocos: " << blockCount << std::endl;
+	std::cout << ".quantidade de threads: " << threadCount << std::endl;
+	std::cout << ".device state: " << d_state << std::endl;
+	seed = time(NULL);
+	setup_kernel << <blockCount, threadCount>> > (seed, d_state);
 
 	// processing in device
-	printf("\n>processing in \"device\" (two factors -> rand and then check):");
-	seed = time(NULL);
+	printf("\n>processing in \"device\" (two factors) -> rand and then check:");
 	mark_begin_clock();
 
-	k_randgenerate<<<8, 1024>>>(length, seed, d_state, d_sequence);
+	k_randgenerate<<<blockCount, threadCount>>>(size, seed, d_state, d_sequence);
 	cudaDeviceSynchronize();
-	cudaMemcpy(h_sequence, d_sequence, length * sizeof(int), cudaMemcpyDeviceToHost);
+	cudaMemcpy(h_sequence, d_sequence, size * sizeof(int), cudaMemcpyDeviceToHost);
 
-	even_odd_check<<<8, 1024>>>(length, d_sequence, d_result);
+	even_odd_check<<<blockCount, threadCount >>>(size, d_sequence, d_result);
 	cudaDeviceSynchronize();
-	cudaMemcpy(h_result, d_result, length * sizeof(int), cudaMemcpyDeviceToHost);
+	cudaMemcpy(h_result, d_result, size * sizeof(int), cudaMemcpyDeviceToHost);
 
 	mark_end_clock();
-	//time_count_end = time(NULL);
-	present_result(h_sequence, h_result, length);
+	present_time_result();
+	present_result(h_sequence, h_result, size);
+
+	// processing in device
+	printf("\n>processing in \"device\" (two factors - new) -> rand and then check:");
+	mark_begin_clock();
+
+	new_k_randgenerate << <blockCount, threadCount >> > (size, seed, d_state, d_sequence);
+	cudaDeviceSynchronize();
+	cudaMemcpy(h_sequence, d_sequence, size * sizeof(int), cudaMemcpyDeviceToHost);
+
+	even_odd_check << <blockCount, threadCount >> > (size, d_sequence, d_result);
+	cudaDeviceSynchronize();
+	cudaMemcpy(h_result, d_result, size * sizeof(int), cudaMemcpyDeviceToHost);
+
+	mark_end_clock();
+	present_time_result();
+	present_result(h_sequence, h_result, size);
 
 	//time_cost = time_count_end - time_count_begin;
 	//printf("\n.started at: %ds \t.finished at: %ds \t.costs (time): %ds\n", time_count_begin, time_count_end, time_cost);
 	//printf("\n.started at: %ds \t.finished at: %ds \t.costs (time): %ds\n", time_begin, time_end, time_result);
-	present_time_result();
 
 	//processing in device
-	printf("\n>processing in \"device\" (one factor) -> rand and check):");
-	//time_count_begin = time(NULL);
+	printf("\n>processing in \"device\" -> rand and check):");
 	mark_begin_clock();
 
-	k_even_odd_check<<<8, 1024 >>>(length, seed, d_state, d_sequence, d_result);
+	k_even_odd_check<<<blockCount, threadCount >>>(size, seed, d_state, d_sequence, d_result);
 	cudaDeviceSynchronize();
-	cudaMemcpy(h_sequence, d_sequence, length * sizeof(int), cudaMemcpyDeviceToHost);
-	cudaMemcpy(h_result, d_result, length * sizeof(int), cudaMemcpyDeviceToHost);
+	cudaMemcpy(h_sequence, d_sequence, size * sizeof(int), cudaMemcpyDeviceToHost);
+	cudaMemcpy(h_result, d_result, size * sizeof(int), cudaMemcpyDeviceToHost);
 
 	mark_end_clock();
-	//time_count_end = time(NULL);
-	present_result(h_sequence, h_result, length);
-
-	//time_cost = time_count_end - time_count_begin;
-	//printf("\n.started at: %ds \t.finished at: %ds \t.costs (time): %ds\n", time_count_begin, time_count_end, time_cost);
-	//printf("\n.started at: %ds \t.finished at: %ds \t.costs (time): %ds\n", time_begin, time_end, time_result);
 	present_time_result();
+	present_result(h_sequence, h_result, size);
+
+	printf("\n>processing in \"device\" (new) -> rand and check:");
+	mark_begin_clock();
+
+	new_k_even_odd_check << <blockCount, threadCount >> > (size, seed, d_state, d_sequence, d_result);
+	cudaDeviceSynchronize();
+	cudaMemcpy(h_sequence, d_sequence, size * sizeof(int), cudaMemcpyDeviceToHost);
+	cudaMemcpy(h_result, d_result, size * sizeof(int), cudaMemcpyDeviceToHost);
+
+	mark_end_clock();
+	present_time_result();
+	present_result(h_sequence, h_result, size);
 
 
 	//processing in host
-	printf("\n>processing in \"host\" (two factors -> rand and then check):");
-	//time_count_begin = time(NULL);
+	printf("\n>processing in \"host\" (two factors) -> rand and then check):");
 	mark_begin_clock();
 
-	k_randgenerate(h_sequence, length);
-	even_odd_check(h_sequence, h_result, length);
+	k_randgenerate(h_sequence, size);
+	even_odd_check(h_sequence, h_result, size);
 
 	mark_end_clock();
-	//time_count_end = time(NULL);
-	present_result(h_sequence, h_result, length);
-
-	//time_cost = time_count_end - time_count_begin;
-	//printf("\n.started at: %ds \t.finished at: %ds \t.costs (time): %ds\n", time_count_begin, time_count_end, time_cost);
 	present_time_result();
-
+	present_result(h_sequence, h_result, size);
 
 	//free(h_sequence);
 	//free(h_result);
