@@ -1,0 +1,31 @@
+﻿  Compiling CUDA source file kernel.cu...
+  
+  C:\Users\angel\Documents\Trabalhos\BCC\8oPeriodo\PP_Alexandre\seminario\producao\aplicabilidades\aplicacao\manipulaçãoimagens\MestreEscravo\MestreEscravo>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.7\bin\nvcc.exe" -gencode=arch=compute_52,code=\"sm_52,compute_52\" --use-local-env -ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64" -x cu   -IC:\opencv\build\include -IC:\opencv\build\include\opencv2 -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.7\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.7\include"  -G   --keep-dir x64\Debug  -maxrregcount=0  --machine 64 --compile -cudart static  -g  -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Fdx64\Debug\vc143.pdb /FS /Zi /RTC1 /MDd " -o C:\Users\angel\Documents\Trabalhos\BCC\8oPeriodo\PP_Alexandre\seminario\producao\aplicabilidades\aplicacao\manipulaçãoimagens\MestreEscravo\MestreEscravo\x64\Debug\kernel.cu.obj "C:\Users\angel\Documents\Trabalhos\BCC\8oPeriodo\PP_Alexandre\seminario\producao\aplicabilidades\aplicacao\manipulaçãoimagens\MestreEscravo\MestreEscravo\kernel.cu" 
+  kernel.cu
+  Core.cpp
+C:\Users\angel\Documents\Trabalhos\BCC\8oPeriodo\PP_Alexandre\seminario\producao\aplicabilidades\aplicacao\manipulaçãoimagens\MestreEscravo\MestreEscravo\Core.cpp(11,25): warning C4244: '=': conversão de 'float' para 'unsigned char', possível perda de dados
+C:\Users\angel\Documents\Trabalhos\BCC\8oPeriodo\PP_Alexandre\seminario\producao\aplicabilidades\aplicacao\manipulaçãoimagens\MestreEscravo\MestreEscravo\Core.cpp(21,35): warning C4244: '=': conversão de 'float' para 'unsigned char', possível perda de dados
+C:\Users\angel\Documents\Trabalhos\BCC\8oPeriodo\PP_Alexandre\seminario\producao\aplicabilidades\aplicacao\manipulaçãoimagens\MestreEscravo\MestreEscravo\Core.cpp(44,25): warning C4244: '=': conversão de 'float' para 'unsigned char', possível perda de dados
+  Main.cpp
+C:\Users\angel\Documents\Trabalhos\BCC\8oPeriodo\PP_Alexandre\seminario\producao\aplicabilidades\aplicacao\manipulaçãoimagens\MestreEscravo\MestreEscravo\Device.h(41,28): warning C4244: '=': conversão de 'float' para 'int', possível perda de dados
+C:\Users\angel\Documents\Trabalhos\BCC\8oPeriodo\PP_Alexandre\seminario\producao\aplicabilidades\aplicacao\manipulaçãoimagens\MestreEscravo\MestreEscravo\Device.h(43,43): warning C4244: '=': conversão de 'float' para 'int', possível perda de dados
+C:\Users\angel\Documents\Trabalhos\BCC\8oPeriodo\PP_Alexandre\seminario\producao\aplicabilidades\aplicacao\manipulaçãoimagens\MestreEscravo\MestreEscravo\Utilities.h(25,122): warning C4244: '=': conversão de '_Rep' para 'int', possível perda de dados
+          with
+          [
+              _Rep=__int64
+          ]
+C:\Users\angel\Documents\Trabalhos\BCC\8oPeriodo\PP_Alexandre\seminario\producao\aplicabilidades\aplicacao\manipulaçãoimagens\MestreEscravo\MestreEscravo\Utilities.h(68,16): warning C4477: 'printf': a cadeia de formato '%d' requer um argumento do tipo 'int', mas um argumento variadic 2 tem o tipo 'std::chrono::steady_clock::time_point'
+C:\Users\angel\Documents\Trabalhos\BCC\8oPeriodo\PP_Alexandre\seminario\producao\aplicabilidades\aplicacao\manipulaçãoimagens\MestreEscravo\MestreEscravo\Utilities.h(68,16): warning C4477: 'printf': a cadeia de formato '%d' requer um argumento do tipo 'int', mas um argumento variadic 3 tem o tipo 'std::chrono::steady_clock::time_point'
+C:\Users\angel\Documents\Trabalhos\BCC\8oPeriodo\PP_Alexandre\seminario\producao\aplicabilidades\aplicacao\manipulaçãoimagens\MestreEscravo\MestreEscravo\Main.cpp(33,5): warning C4102: 'std': rótulo não referenciado
+  Utilities.h
+C:\Users\angel\Documents\Trabalhos\BCC\8oPeriodo\PP_Alexandre\seminario\producao\aplicabilidades\aplicacao\manipulaçãoimagens\MestreEscravo\MestreEscravo\Utilities.h(25,122): warning C4244: '=': conversão de '_Rep' para 'int', possível perda de dados
+          with
+          [
+              _Rep=__int64
+          ]
+C:\Users\angel\Documents\Trabalhos\BCC\8oPeriodo\PP_Alexandre\seminario\producao\aplicabilidades\aplicacao\manipulaçãoimagens\MestreEscravo\MestreEscravo\Utilities.h(68,16): warning C4477: 'printf': a cadeia de formato '%d' requer um argumento do tipo 'int', mas um argumento variadic 2 tem o tipo 'std::chrono::steady_clock::time_point'
+C:\Users\angel\Documents\Trabalhos\BCC\8oPeriodo\PP_Alexandre\seminario\producao\aplicabilidades\aplicacao\manipulaçãoimagens\MestreEscravo\MestreEscravo\Utilities.h(68,16): warning C4477: 'printf': a cadeia de formato '%d' requer um argumento do tipo 'int', mas um argumento variadic 3 tem o tipo 'std::chrono::steady_clock::time_point'
+  Gerando Código...
+     Criando biblioteca C:\Users\angel\Documents\Trabalhos\BCC\8oPeriodo\PP_Alexandre\seminario\producao\aplicabilidades\aplicacao\manipulaçãoimagens\MestreEscravo\x64\Debug\MestreEscravo.lib e objeto C:\Users\angel\Documents\Trabalhos\BCC\8oPeriodo\PP_Alexandre\seminario\producao\aplicabilidades\aplicacao\manipulaçãoimagens\MestreEscravo\x64\Debug\MestreEscravo.exp
+LINK : warning LNK4098: defaultlib 'LIBCMT' conflita com uso de outras bibliotecas; use /NODEFAULTLIB:library
+  MestreEscravo.vcxproj -> C:\Users\angel\Documents\Trabalhos\BCC\8oPeriodo\PP_Alexandre\seminario\producao\aplicabilidades\aplicacao\manipulaçãoimagens\MestreEscravo\x64\Debug\MestreEscravo.exe
