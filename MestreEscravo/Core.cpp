@@ -29,10 +29,10 @@ void Core_Thresholding(unsigned char* sourceImage, int width, int height, int ch
 	for (int i = 0; i < size; i += channels) {
 		RGBFactor = 0;
 
+		// média
 		for (int j = 0; j < channels; j++)
 			RGBFactor += sourceImage[i + j];
 
-		// média
 		RGBFactor /= channels;
 
 		if (RGBFactor < thresh)

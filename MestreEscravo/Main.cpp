@@ -111,6 +111,7 @@ int main(int argc, char* argv[]) {
     imwrite("core_" + imageTo, inputImage);
     //*/
 
+    ct->reset_time_buffer();
 
     //Processar no kernel - Mestre Escravo
     std::cout << "Carregando Imagem:\n" << ".from: \"" << imageFrom << "\"\n.to: \"" << imageTo << "\"" << std::endl;
@@ -141,7 +142,7 @@ int main(int argc, char* argv[]) {
             ct->present_time_stamp(" \n(processamento e verificacao da flag)\n");
 
             ct->mark_begin_clock();
-            mt->synchDeviceToHost(inputImage.data, 3);
+            mt->synchDeviceToHost(inputImage.data, i);
             ct->mark_end_clock();
             ct->present_time_stamp(" \n(barramento de resultado)\n");
 
@@ -163,10 +164,11 @@ int main(int argc, char* argv[]) {
 
     ct->present_time_buffer(" \n(resultado final)\n");
     ShowImage(inputImage, "kernel - Thresholding (" + std::to_string(thresh) + ")");
-    imwrite("kernel_" + imageTo, inputImage);
+    imwrite(imageTo, inputImage);
 
-    //free(ct);
-    //free(mt);
+
+    free(ct);
+    free(mt);
 
     return 0;
 }

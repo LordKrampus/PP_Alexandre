@@ -75,15 +75,10 @@ void Kernel_Thresholding(unsigned char* d_image, int size, int channels, int thr
 
 void Run_Kernel(unsigned char** d_image, int slice_size, int start_index, int channels, int thresh, int* mark_step, int block_count, int thread_count) {
     cuda_invertToGrayscale << <block_count, thread_count >> > (d_image[0], d_image[1], slice_size, start_index, channels, mark_step, 0, 1);
-    //cudaDeviceSynchronize();
-    //*mark_step += 1;
 
     cuda_invertColors << <block_count, thread_count >> > (d_image[1], d_image[2], slice_size, start_index, channels, mark_step, 1, 2);
-    //cudaDeviceSynchronize();
-    //*mark_step += 1;
 
     cuda_thresholding << <block_count, thread_count >> > (d_image[2], d_image[3], slice_size, start_index, channels, thresh, mark_step, 2, 3);
-    //cudaDeviceSynchronize();
 }
 
 /*

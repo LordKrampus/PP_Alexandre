@@ -16,7 +16,8 @@ void Kernel_Thresholding(unsigned char* d_image, int size, int channels, int thr
 
 void Run_Kernel(unsigned char** d_image, int slice_size, int start_index, int channels, int thresh, int* mark_step, int block_count, int thread_count);
 
-class Manager {
+class Manager 
+{
 private:
 
     unsigned char** d_image; // device image
@@ -33,7 +34,8 @@ private:
     int block_count;
     int thread_count;
 
-    void configImageSize(int width, int height, int channels, int thresh) {
+    void configImageSize(int width, int height, int channels, int thresh) 
+    {
         this->i_size = width * height * channels;
         this->channels = channels;
         this->thresh = thresh;
@@ -57,7 +59,8 @@ private:
     }
 
     
-    void ConfigProcessors(int p_count) {
+    void ConfigProcessors(int p_count) 
+    {
         // prepara sincrono de CPU
         this->p_count = p_count;
         this->p_steps = (int*)calloc(this->p_count, sizeof(int));
@@ -66,7 +69,7 @@ private:
         /*
         for (int i = 1; i < this->p_count; i++)
             this->p_steps[i] = 3;
-        */
+        //*/
 
         // aloca no device
         cudaMalloc((void**)&this->d_pSteps, this->p_count*sizeof(int));
@@ -75,7 +78,8 @@ private:
 
 
 public:
-    Manager(int p_count) {
+    Manager(int p_count) 
+    {
         this->ConfigProcessors(p_count);
 
         this->i_size = 0;
@@ -89,14 +93,15 @@ public:
         this->d_image = (unsigned char**)malloc(4*sizeof(unsigned char**));
     }
 
-    ~Manager() {
+    ~Manager() 
+    {
         cudaFree(d_image);
         cudaFree(d_pSteps);
         free(p_steps);
     }
 
-
-    void configDevice(unsigned char* sourceImage, int width, int height, int channels, int thresh) {
+    void configDevice(unsigned char* sourceImage, int width, int height, int channels, int thresh) 
+    {
         this->configImageSize(width, height, channels, thresh);
         this->configDeviceMem(sourceImage);
     }
@@ -104,7 +109,7 @@ public:
     void RunRoutine() 
     {
         int start_index;
-        //for (int i = 0; i < 1; i++) {
+        //for (int i = 3; i < 4; i++) {
         for (int i = 0; i < this->p_count; i++) {
             start_index = i * this->s_size;
             Run_Kernel(this->d_image, this->s_size, start_index, this->channels, this->thresh, &this->d_pSteps[i], this->block_count, this->thread_count);
@@ -122,21 +127,24 @@ public:
     std::cout << "In Routine" << this->p_steps[i] << std::endl;
     */
 
-    int checkStep() {
+    int checkStep() 
+    {
         cudaMemcpy(this->p_steps, this->d_pSteps, this->p_count * sizeof(int), cudaMemcpyDeviceToHost);
 
         int step = this->p_steps[0];
+        //*
         for (int i = 1; i < this->p_count; i++) {
             if (this->p_steps[i] < step) {
                 step = this->p_steps[i];
             }
         }
+        //*/
 
         return step;
     }
 
-    void synchDeviceToHost(unsigned char* result, int step) {
-
+    void synchDeviceToHost(unsigned char* result, int step) 
+    {
         cudaMemcpy(result, this->d_image[step], this->i_size, cudaMemcpyDeviceToHost);
     }
 };
